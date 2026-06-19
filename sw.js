@@ -1,6 +1,8 @@
 // The Guitar Hunters — service worker (cache-first pour usage hors-ligne)
 const CACHE = 'guitar-hunters-v1';
-const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
+const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './logo.png',
+  './fonts/MetalMania-Regular.ttf', './fonts/Anton-Regular.ttf', './fonts/BarlowCondensed-Bold.ttf',
+  './fonts/BarlowCondensed-SemiBold.ttf', './fonts/Barlow-Regular.ttf', './fonts/Barlow-SemiBold.ttf'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
 });
