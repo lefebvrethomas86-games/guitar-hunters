@@ -1,5 +1,7 @@
-// The Guitar Hunters — service worker (cache-first pour usage hors-ligne)
-const CACHE = 'guitar-hunters-v1';
+// The Guitar Hunters — service worker
+// Page : reseau d'abord (toujours le dernier rapport) avec repli cache hors-ligne.
+// Assets (polices/icones/logo/images) : cache d'abord (rapide + hors-ligne).
+const CACHE = 'guitar-hunters-v2';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './logo.png',
   './fonts/MetalMania-Regular.ttf', './fonts/Anton-Regular.ttf', './fonts/BarlowCondensed-Bold.ttf',
   './fonts/BarlowCondensed-SemiBold.ttf', './fonts/Barlow-Regular.ttf', './fonts/Barlow-SemiBold.ttf'];
@@ -12,11 +14,17 @@ self.addEventListener('activate', e => {
 });
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
-  e.respondWith(
-    caches.match(e.request).then(hit => hit || fetch(e.request).then(resp => {
-      const copy = resp.clone();
-      caches.open(CACHE).then(c => c.put(e.request, copy)).catch(() => {});
-      return resp;
-    }).catch(() => caches.match('./index.html')))
-  );
+  const req = e.request;
+  const isDoc = req.mode === 'navigate' || req.destination === 'document';
+  if (isDoc) {
+    e.respondWith(fetch(req).then(r => {
+      const c = r.clone(); caches.open(CACHE).then(ca => ca.put(req, c)).catch(() => {});
+      return r;
+    }).catch(() => caches.match(req).then(h => h || caches.match('./index.html'))));
+    return;
+  }
+  e.respondWith(caches.match(req).then(hit => hit || fetch(req).then(r => {
+    const c = r.clone(); caches.open(CACHE).then(ca => ca.put(req, c)).catch(() => {});
+    return r;
+  }).catch(() => {})));
 });
